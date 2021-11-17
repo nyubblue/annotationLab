@@ -1,16 +1,12 @@
 package ubun.annotation;
 
-import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Documented
-@Inherited
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface MostUsed {
-	String value() default "Java";
+public @interface Column {
+
 }
