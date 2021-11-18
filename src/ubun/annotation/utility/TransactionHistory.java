@@ -2,20 +2,20 @@ package ubun.annotation.utility;
 
 import ubun.annotation.Column;
 import ubun.annotation.PrimaryKey;
-
+@DefineTable(name = "transaction_history")
 public class TransactionHistory {
-	@PrimaryKey
+	@PrimaryKey(name = "transaction_id")
 	private long transactionId;
-	@Column
+	@Column(name = "account_number")
 	private int accountNumber;
 	@Column
 	private String name;
-	@Column
+	@Column(name = "transaction_type")
 	private String transactionType;
 	@Column
-	private double amount;
+	private int amount;
 
-	public TransactionHistory(int accountNumber, String name, String transactionType, double amount) {
+	public TransactionHistory(int accountNumber, String name, String transactionType, int amount) {
 		this.accountNumber = accountNumber;
 		this.name = name;
 		this.transactionType = transactionType;
@@ -62,7 +62,7 @@ public class TransactionHistory {
 		return amount;
 	}
 
-	public void setAmount(double amount) {
+	public void setAmount(int amount) {
 		this.amount = amount;
 	}
 

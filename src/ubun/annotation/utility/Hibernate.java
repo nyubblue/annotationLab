@@ -1,5 +1,6 @@
 package ubun.annotation.utility;
 
+import java.awt.datatransfer.StringSelection;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -7,6 +8,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ public class Hibernate<T> {
 	public void write(T t) throws IllegalArgumentException, IllegalAccessException, SQLException {
 		Class<? extends Object> clzz = t.getClass();
 		Field[] fields = clzz.getDeclaredFields();
+		DefineTable table = clzz.getAnnotation(DefineTable.class);
 		Field prkey = null;
 		StringJoiner joiner = new StringJoiner(",");
 		List<Field> columns = new ArrayList<>();
@@ -43,20 +46,24 @@ public class Hibernate<T> {
 				System.out.println(
 						"The primary key is : " + f.getName() + "value : " + f.get(t) + " and the columns are : ");
 			} else if (f.isAnnotationPresent(Column.class)) {
-				joiner.add(f.getName());
+				joiner.add(f.getAnnotation(Column.class).name().isEmpty() ? f.getName()
+						: f.getAnnotation(Column.class).name());
 				columns.add(f);
 				System.out.println(f.getName() + " value : " + f.get(t));
 			}
 		}
 		int number = columns.size() + 1;
 		String qMark = IntStream.range(0, number).mapToObj(e -> "?").collect(Collectors.joining(","));
-		String sql = "INSERT INTO " + clzz.getSimpleName() + "( " + prkey.getName() + "," +joiner.toString() + ") "
-				+ "VALUES (" + qMark + ")";
+		String sql = "INSERT INTO " + table.name() + "( "
+				+ (prkey.getAnnotation(PrimaryKey.class).name().isEmpty() ? prkey.getName()
+						: prkey.getAnnotation(PrimaryKey.class).name())
+				+ "," + joiner.toString() + ") " + "VALUES (" + qMark + ")";
 		System.out.println("Success\n");
 		PreparedStatement stmt = con.prepareStatement(sql);
 		if (prkey.getType() == long.class) {
 			stmt.setLong(1, id.incrementAndGet());
 		}
+		System.out.println("\n" + sql + "\n-----END-----");
 		int index = 2;
 		for (Field field : fields) {
 			field.setAccessible(true);
@@ -66,7 +73,7 @@ public class Hibernate<T> {
 				stmt.setString(index++, (String) field.get(t));
 			}
 		}
-		System.out.println("\n" + sql + "\n-----END-----");
+		stmt.execute();
 
 	}
 }
